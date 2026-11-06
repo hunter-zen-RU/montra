@@ -1,0 +1,22 @@
+name: Repodir Unzip & Audit
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  unzip-and-audit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Repodir Unzip and Audit Pipeline
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -fsSL https://hunter-zen-ru.github.io/scripts/repodir.sh | bash -s -- --yml --unzip-to-root '*.zip' --audit .
