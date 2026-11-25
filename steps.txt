@@ -1,0 +1,68 @@
+===================================================================================================================
+done [yes]
+step [1]
+#####################
+Here are potential new features ready to be integrated into Montra:
+
+    Native Gemini 2.5 AI SDK Integration: Upgrade lib/aiAssistant.js from generic HTTP calls to @google/genai with Gemini 2.5 Flash for high-speed chat summarization, multilingual translation, voice note transcription, and AI replies.
+
+    Interactive Dashboard Analytics & Activity Heatmap: Expand lib/analyzeEngine.js with visual charts for daily message volumes, peak activity hours, and real-time anti-ban quota consumption.
+
+    One-Tap Quick Actions on Telegram: Add interactive inline buttons directly beneath forwarded WhatsApp messages (e.g., [👍 Quick Like], [🤖 AI Draft], [🔇 Mute 1hr], [📁 Save to Files]).
+
+    Contact Tagging & CRM Notes: Enable tagging contacts (e.g., VIP, Client, Family) and storing private local notes, queryable from both Telegram and the dashboard.
+
+    Encrypted Backups: Add AES-256-GCM symmetric passphrase encryption to /backup snapshots.
+implement the new features
+
+============================================================================================================
+done [yes]
+step [2]
+#####################
+
+
+
+add status post sheduler witha folder dedicated to store all the status to be uploaded stories/{date} ,, inside each folder a json with details about the post and when to post + caption , and caption only for text based posts
+
+do a dashboard ui makeover with colors inspired from the assets ,, add the following telegram flows
+
+    alert <when> <message> ,, get a message when something happens eg mentioned privately , new dms , tried to called ,, add variables {name} {text} {action} and others for more customization
+
+    make the foward and history to display name
+
+    message
+
+    add other commands and features
+
+==========================================================================================================================
+done [yes]
+step [3]
+#####################
+
+check and test all funtions to verify they work correctly , fix all bugs and errors ,add stream mode similar to chatmode but this fowards all new messages from whatsapp , with name time type (eg group , chat , or channel ) and type name (name of the group , chat or channel) , and the message simplified or cut to maximum of two sentences ,, with button reply , histoty , details , react , and other buttons that affect the streamed message also
+add new features to make the project better
+
+
+=====================================================================================================================
+done [yes]
+step [4]
+#####################
+
+add a command to lock both dashboard and telegram untill /start {pin} is put for security
+
+=====================================================================================================================
+done [yes]
+step [5]
+#####################
+
+make the project to use a default gemini api key for chat and the other basics if no custom api key of other providers is specified
+===================================================================================================================
+done [yes]
+step [6]
+#####################
+add a api endpoint for one time message (otm) without exposing the token ,
+but must have a predefined otm key, that allows sending a single message on one line link or a json formatted , 
+allow variables in message eg {name} etc and a limit of 600 , add a return value and message , 
+the otm in basic sends instantly within the global cooldown but can also be sheduled for later (using the json) , 
+return a help message if the api is used without the otm key or incorrect syntax ,,
+add other details to this endpoint to make it proffessional

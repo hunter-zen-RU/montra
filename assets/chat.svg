@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Rainbow Gradient User Icon</title>
+  <desc id="desc">A colorful user silhouette and burst accents inside a continuous rainbow-gradient circle with a white divider and dark green center.</desc>
+  <defs>
+    <linearGradient id="ringGradient" x1=".08" y1=".12" x2=".9" y2=".9" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#a8ff00"/><stop offset=".17" stop-color="#00e94c"/><stop offset=".34" stop-color="#00d8d7"/><stop offset=".5" stop-color="#087cff"/><stop offset=".65" stop-color="#5324ff"/><stop offset=".8" stop-color="#f000e9"/><stop offset=".91" stop-color="#ff315c"/><stop offset="1" stop-color="#ffb000"/>
+    </linearGradient>
+    <radialGradient id="greenCenter" cx="48%" cy="38%" r="75%"><stop offset="0" stop-color="#00512d"/><stop offset=".65" stop-color="#003d25"/><stop offset="1" stop-color="#00291b"/></radialGradient>
+    <linearGradient id="avatarGradient" x1=".1" y1=".05" x2=".9" y2=".95" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#fff000"/><stop offset=".2" stop-color="#a5ff00"/><stop offset=".38" stop-color="#00e6b6"/><stop offset=".54" stop-color="#078bff"/><stop offset=".7" stop-color="#3c18ff"/><stop offset=".84" stop-color="#d600f3"/><stop offset="1" stop-color="#ff1682"/>
+    </linearGradient>
+    <linearGradient id="torsoGradient" x1=".05" y1=".08" x2=".95" y2=".9" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#ffdc00"/><stop offset=".19" stop-color="#b9ff00"/><stop offset=".37" stop-color="#00e9a5"/><stop offset=".53" stop-color="#176dff"/><stop offset=".7" stop-color="#8d13ff"/><stop offset=".84" stop-color="#ff00c8"/><stop offset="1" stop-color="#ff354f"/>
+    </linearGradient>
+    <linearGradient id="warmBurst" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#ffdf00"/><stop offset=".55" stop-color="#ff8b00"/><stop offset="1" stop-color="#ff2c6f"/></linearGradient>
+    <linearGradient id="coolBurst" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#00d9df"/><stop offset=".55" stop-color="#176bff"/><stop offset="1" stop-color="#d500ed"/></linearGradient>
+    <clipPath id="headClip"><circle cx="256" cy="194" r="67"/></clipPath>
+    <clipPath id="bodyClip"><path d="M145 353 C151 309 183 276 220 270 C235 267 243 280 256 280 C270 280 278 267 293 270 C331 276 361 309 367 353 C370 374 347 388 256 388 C165 388 142 374 145 353Z"/></clipPath>
+  </defs>
+  <!-- Continuous outer ring: no chat tail or gap -->
+  <circle cx="256" cy="256" r="226" fill="url(#ringGradient)"/>
+  <circle cx="256" cy="256" r="193" fill="#fff"/>
+  <circle cx="256" cy="256" r="182" fill="url(#greenCenter)"/>
+  <!-- Burst accents, each an editable path -->
+  <g id="left-burst" fill="url(#warmBurst)">
+    <path d="M132 160 C126 153 130 144 138 143 C143 142 147 145 151 150 L177 182 C181 188 176 193 170 189Z"/>
+    <path d="M111 217 C102 217 98 209 101 202 C103 197 108 195 115 196 L170 207 C179 209 178 216 170 218Z"/>
+    <path d="M121 275 C113 280 105 275 106 267 C106 263 109 260 115 256 L164 236 C173 232 177 239 169 245Z"/>
+  </g>
+  <g id="right-burst" fill="url(#coolBurst)">
+    <path d="M380 160 C386 153 382 144 374 143 C369 142 365 145 361 150 L335 182 C331 188 336 193 342 189Z"/>
+    <path d="M401 217 C410 217 414 209 411 202 C409 197 404 195 397 196 L342 207 C333 209 334 216 342 218Z"/>
+    <path d="M391 275 C399 280 407 275 406 267 C406 263 403 260 397 256 L348 236 C339 232 335 239 343 245Z"/>
+  </g>
+  <!-- Gradient head with flowing color ribbons -->
+  <g id="user-head">
+    <circle cx="256" cy="194" r="67" fill="url(#avatarGradient)"/>
+    <g clip-path="url(#headClip)">
+      <path d="M177 143 C214 113 268 117 296 141 C320 162 299 191 272 207 C241 225 207 231 196 264 L171 235Z" fill="#e7ff00" opacity=".72"/>
+      <path d="M189 238 C206 207 250 207 281 183 C305 164 315 145 316 126 L340 171 L324 236 L257 270 L198 263Z" fill="#00c9e9" opacity=".8"/>
+      <path d="M201 270 C218 234 253 225 286 208 C310 196 329 177 333 158 L345 224 L294 273 L230 280Z" fill="#5c16ff" opacity=".92"/>
+    </g>
+  </g>
+  <!-- Gradient shoulders / torso -->
+  <g id="user-shoulders">
+    <path d="M145 353 C151 309 183 276 220 270 C235 267 243 280 256 280 C270 280 278 267 293 270 C331 276 361 309 367 353 C370 374 347 388 256 388 C165 388 142 374 145 353Z" fill="url(#torsoGradient)"/>
+    <g clip-path="url(#bodyClip)">
+      <path d="M136 323 C169 280 201 274 228 286 C252 297 270 293 294 280 C320 266 349 285 377 311 L374 338 C339 314 315 312 284 333 C247 358 213 365 183 346 C164 335 150 332 136 342Z" fill="#caff00" opacity=".8"/>
+      <path d="M135 349 C171 374 211 369 250 347 C291 324 321 305 362 321 L383 374 L347 402 L165 402Z" fill="#ff00b9" opacity=".7"/>
+    </g>
+  </g>
+</svg>

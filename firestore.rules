@@ -1,0 +1,271 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global safety net: deny everything by default.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isVerifiedUser() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        request.auth.token.email == 'malcommarkeshly@gmail.com'
+      );
+    }
+
+    function isValidUser(data, userId) {
+      return data.keys().hasAll(['uid', 'email', 'displayName', 'role', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['uid', 'email', 'displayName', 'role', 'createdAt', 'updatedAt'])
+        && data.uid is string && data.uid == userId && isValidId(data.uid)
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 254
+        && data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 120
+        && data.role is string && data.role == 'operator'
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidBotSnapshot(data, userId) {
+      return data.keys().hasAll(['ownerId', 'title', 'summary', 'activeBots', 'cycleCount', 'status', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['ownerId', 'title', 'summary', 'activeBots', 'cycleCount', 'status', 'createdAt', 'updatedAt'])
+        && data.ownerId is string && data.ownerId == userId && isValidId(data.ownerId)
+        && data.title is string && data.title.size() >= 1 && data.title.size() <= 160
+        && data.summary is string && data.summary.size() >= 1 && data.summary.size() <= 2000
+        && data.activeBots is list && data.activeBots.size() >= 0 && data.activeBots.size() <= 10
+        && (data.activeBots.size() == 0 || (data.activeBots[0] is string && data.activeBots[0].size() <= 40))
+        && data.cycleCount is int && data.cycleCount >= 0 && data.cycleCount <= 100000000
+        && data.status is string && data.status in ['active', 'archived']
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidWorkspaceNote(data, userId) {
+      return data.keys().hasAll(['ownerId', 'service', 'title', 'content', 'status', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['ownerId', 'service', 'title', 'content', 'status', 'createdAt', 'updatedAt'])
+        && data.ownerId is string && data.ownerId == userId && isValidId(data.ownerId)
+        && data['service'] is string && data['service'] in ['drive', 'gmail', 'contacts', 'calendar', 'tasks', 'chat']
+        && data.title is string && data.title.size() >= 1 && data.title.size() <= 200
+        && data.content is string && data.content.size() >= 1 && data.content.size() <= 2000
+        && data.status is string && data.status in ['open', 'completed']
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidServiceId(id) {
+      return id is string && id in ['drive', 'gmail', 'contacts', 'calendar', 'tasks', 'chat'];
+    }
+
+    function isValidServiceSync(data, userId, serviceId) {
+      return data.keys().hasAll(['ownerId', 'serviceId', 'enabled', 'lastStatus', 'lastSyncedAt', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['ownerId', 'serviceId', 'enabled', 'lastStatus', 'lastSyncedAt', 'createdAt', 'updatedAt'])
+        && data.ownerId is string && data.ownerId == userId && isValidId(data.ownerId)
+        && isValidServiceId(serviceId)
+        && data.serviceId is string && data.serviceId == serviceId
+        && data.enabled is bool
+        && data.lastStatus is string && data.lastStatus in ['idle', 'syncing', 'synced', 'paused', 'error']
+        && data.lastSyncedAt is string && data.lastSyncedAt.size() <= 64
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidScopeConfig(data, userId, serviceId) {
+      return data.keys().hasAll(['ownerId', 'serviceId', 'profile', 'scopes', 'includeInAuth', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['ownerId', 'serviceId', 'profile', 'scopes', 'includeInAuth', 'createdAt', 'updatedAt'])
+        && data.ownerId is string && data.ownerId == userId && isValidId(data.ownerId)
+        && isValidServiceId(serviceId)
+        && data.serviceId is string && data.serviceId == serviceId
+        && data.profile is string && data.profile in ['minimal', 'standard', 'full', 'custom']
+        && data.scopes is list && data.scopes.size() >= 1 && data.scopes.size() <= 35
+        && data.scopes[0] is string && data.scopes[0].size() >= 10 && data.scopes[0].size() <= 200
+        && data.includeInAuth is bool
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    // Connection probe document for startup getDocFromServer check
+    match /test/connection {
+      allow get: if isSignedIn();
+      allow list, create, update, delete: if false;
+    }
+
+    // Admin registry (read-only by self or admin; managed via Firebase console)
+    match /admins/{adminId} {
+      allow get: if isValidId(adminId) && (isOwner(adminId) || isAdmin());
+      allow list, create, update, delete: if false;
+    }
+
+    // PII-isolated user profile documents
+    match /users/{userId} {
+      allow get: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if false;
+      allow create: if isValidId(userId)
+        && isVerifiedUser()
+        && isOwner(userId)
+        && isValidUser(incoming(), userId)
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isValidId(userId)
+        && isVerifiedUser()
+        && isValidUser(incoming(), userId)
+        && incoming().uid == existing().uid
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          isAdmin() ||
+          (isOwner(userId) && incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'email', 'updatedAt']))
+        );
+      allow delete: if isValidId(userId) && isAdmin();
+
+      // Subcollection: Bot fleet telemetry & communication snapshots
+      match /botSnapshots/{snapshotId} {
+        allow get: if isValidId(userId) && isValidId(snapshotId) && (isOwner(userId) || isAdmin());
+        allow list: if isSignedIn() && (resource.data.ownerId == request.auth.uid || isAdmin());
+        allow create: if isValidId(userId)
+          && isValidId(snapshotId)
+          && isVerifiedUser()
+          && isOwner(userId)
+          && isValidBotSnapshot(incoming(), userId)
+          && incoming().createdAt == request.time
+          && incoming().updatedAt == request.time
+          && exists(/databases/$(database)/documents/users/$(userId));
+        allow update: if isValidId(userId)
+          && isValidId(snapshotId)
+          && isVerifiedUser()
+          && isValidBotSnapshot(incoming(), userId)
+          && incoming().ownerId == existing().ownerId
+          && incoming().createdAt == existing().createdAt
+          && incoming().updatedAt == request.time
+          && get(/databases/$(database)/documents/users/$(userId)).data.uid == userId
+          && (
+            isAdmin() ||
+            (
+              isOwner(userId)
+              && existing().status != 'archived'
+              && (
+                (incoming().status == 'active' && incoming().diff(existing()).affectedKeys().hasOnly(['title', 'summary', 'activeBots', 'cycleCount', 'updatedAt'])) ||
+                (incoming().status == 'archived' && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt']))
+              )
+            )
+          );
+        allow delete: if isValidId(userId) && isValidId(snapshotId) && isVerifiedUser() && (isOwner(userId) || isAdmin());
+      }
+
+      // Subcollection: Operator Google Workspace digests & notes
+      match /workspaceNotes/{noteId} {
+        allow get: if isValidId(userId) && isValidId(noteId) && (isOwner(userId) || isAdmin());
+        allow list: if isSignedIn() && (resource.data.ownerId == request.auth.uid || isAdmin());
+        allow create: if isValidId(userId)
+          && isValidId(noteId)
+          && isVerifiedUser()
+          && isOwner(userId)
+          && isValidWorkspaceNote(incoming(), userId)
+          && incoming().createdAt == request.time
+          && incoming().updatedAt == request.time
+          && exists(/databases/$(database)/documents/users/$(userId));
+        allow update: if isValidId(userId)
+          && isValidId(noteId)
+          && isVerifiedUser()
+          && isValidWorkspaceNote(incoming(), userId)
+          && incoming().ownerId == existing().ownerId
+          && incoming().createdAt == existing().createdAt
+          && incoming().updatedAt == request.time
+          && get(/databases/$(database)/documents/users/$(userId)).data.uid == userId
+          && (
+            isAdmin() ||
+            (
+              isOwner(userId)
+              && existing().status != 'completed'
+              && (
+                (incoming().status == 'open' && incoming().diff(existing()).affectedKeys().hasOnly(['title', 'content', 'updatedAt'])) ||
+                (incoming().status == 'completed' && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt']))
+              )
+            )
+          );
+        allow delete: if isValidId(userId) && isValidId(noteId) && isVerifiedUser() && (isOwner(userId) || isAdmin());
+      }
+
+      // Subcollection: Per-service Google Workspace synchronization toggles & status
+      match /serviceSync/{serviceId} {
+        allow get: if isValidId(userId) && isValidId(serviceId) && isValidServiceId(serviceId) && (isOwner(userId) || isAdmin());
+        allow list: if isSignedIn() && (resource.data.ownerId == request.auth.uid || isAdmin());
+        allow create: if isValidId(userId)
+          && isValidId(serviceId)
+          && isValidServiceId(serviceId)
+          && isVerifiedUser()
+          && isOwner(userId)
+          && isValidServiceSync(incoming(), userId, serviceId)
+          && incoming().createdAt == request.time
+          && incoming().updatedAt == request.time
+          && exists(/databases/$(database)/documents/users/$(userId));
+        allow update: if isValidId(userId)
+          && isValidId(serviceId)
+          && isValidServiceId(serviceId)
+          && isVerifiedUser()
+          && isValidServiceSync(incoming(), userId, serviceId)
+          && incoming().ownerId == existing().ownerId
+          && incoming().serviceId == existing().serviceId
+          && incoming().createdAt == existing().createdAt
+          && incoming().updatedAt == request.time
+          && get(/databases/$(database)/documents/users/$(userId)).data.uid == userId
+          && (
+            isAdmin() ||
+            (isOwner(userId) && incoming().diff(existing()).affectedKeys().hasOnly(['enabled', 'lastStatus', 'lastSyncedAt', 'updatedAt']))
+          );
+        allow delete: if isValidId(userId) && isValidId(serviceId) && isValidServiceId(serviceId) && isVerifiedUser() && (isOwner(userId) || isAdmin());
+      }
+
+      // Subcollection: Configurable Google API OAuth scopes per enabled Workspace service
+      match /scopeConfigs/{serviceId} {
+        allow get: if isValidId(userId) && isValidId(serviceId) && isValidServiceId(serviceId) && (isOwner(userId) || isAdmin());
+        allow list: if isSignedIn() && (resource.data.ownerId == request.auth.uid || isAdmin());
+        allow create: if isValidId(userId)
+          && isValidId(serviceId)
+          && isValidServiceId(serviceId)
+          && isVerifiedUser()
+          && isOwner(userId)
+          && isValidScopeConfig(incoming(), userId, serviceId)
+          && incoming().createdAt == request.time
+          && incoming().updatedAt == request.time
+          && exists(/databases/$(database)/documents/users/$(userId));
+        allow update: if isValidId(userId)
+          && isValidId(serviceId)
+          && isValidServiceId(serviceId)
+          && isVerifiedUser()
+          && isValidScopeConfig(incoming(), userId, serviceId)
+          && incoming().ownerId == existing().ownerId
+          && incoming().serviceId == existing().serviceId
+          && incoming().createdAt == existing().createdAt
+          && incoming().updatedAt == request.time
+          && get(/databases/$(database)/documents/users/$(userId)).data.uid == userId
+          && (
+            isAdmin() ||
+            (isOwner(userId) && incoming().diff(existing()).affectedKeys().hasOnly(['profile', 'scopes', 'includeInAuth', 'updatedAt']))
+          );
+        allow delete: if isValidId(userId) && isValidId(serviceId) && isValidServiceId(serviceId) && isVerifiedUser() && (isOwner(userId) || isAdmin());
+      }
+    }
+  }
+}

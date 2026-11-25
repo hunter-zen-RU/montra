@@ -1,0 +1,253 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Private authenticated operator profile for the Montra dashboard.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "Firebase Authentication user UID."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "minLength": 3,
+          "maxLength": 254,
+          "description": "Verified Google account email address."
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "description": "Operator display name."
+        },
+        "role": {
+          "type": "string",
+          "enum": ["operator"],
+          "description": "Standard non-privileged operator role."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server update timestamp."
+        }
+      },
+      "required": ["uid", "email", "displayName", "role", "createdAt", "updatedAt"]
+    },
+    "BotSnapshot": {
+      "title": "BotSnapshot",
+      "description": "Persisted snapshot of Montra 6-bot fleet telemetry, thoughts, and cross-bot messages.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "Owner Firebase Auth UID."
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160,
+          "description": "Snapshot title."
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000,
+          "description": "Summary of bot fleet coordination or thought."
+        },
+        "activeBots": {
+          "type": "array",
+          "description": "List of active bot handles (max 10)."
+        },
+        "cycleCount": {
+          "type": "integer",
+          "description": "Autonomous engine cycle count at snapshot time."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "archived"],
+          "description": "Snapshot lifecycle state; archived is terminal."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server update timestamp."
+        }
+      },
+      "required": ["ownerId", "title", "summary", "activeBots", "cycleCount", "status", "createdAt", "updatedAt"]
+    },
+    "WorkspaceNote": {
+      "title": "WorkspaceNote",
+      "description": "Operator-saved Google Workspace digest or bot action reference.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "Owner Firebase Auth UID."
+        },
+        "service": {
+          "type": "string",
+          "enum": ["drive", "gmail", "contacts", "calendar", "tasks", "chat"],
+          "description": "Originating Google Workspace service."
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Short reference title."
+        },
+        "content": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000,
+          "description": "Saved digest or note content."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["open", "completed"],
+          "description": "Lifecycle status; completed is terminal."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server update timestamp."
+        }
+      },
+      "required": ["ownerId", "service", "title", "content", "status", "createdAt", "updatedAt"]
+    },
+    "ServiceSyncSetting": {
+      "title": "ServiceSyncSetting",
+      "description": "Per-service synchronization configuration and state for Google Workspace integrations.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "Owner Firebase Auth UID."
+        },
+        "serviceId": {
+          "type": "string",
+          "enum": ["drive", "gmail", "contacts", "calendar", "tasks", "chat"],
+          "description": "Google Workspace service identifier."
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether synchronization is enabled for this service."
+        },
+        "lastStatus": {
+          "type": "string",
+          "enum": ["idle", "syncing", "synced", "paused", "error"],
+          "description": "Latest synchronization outcome."
+        },
+        "lastSyncedAt": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "ISO timestamp of most recent sync or empty string."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server update timestamp."
+        }
+      },
+      "required": ["ownerId", "serviceId", "enabled", "lastStatus", "lastSyncedAt", "createdAt", "updatedAt"]
+    },
+    "OAuthScopeConfig": {
+      "title": "OAuthScopeConfig",
+      "description": "Configurable required Google API OAuth scopes per Workspace service for Firebase Auth authorization.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "Owner Firebase Auth UID."
+        },
+        "serviceId": {
+          "type": "string",
+          "enum": ["drive", "gmail", "contacts", "calendar", "tasks", "chat"],
+          "description": "Google Workspace service identifier."
+        },
+        "profile": {
+          "type": "string",
+          "enum": ["minimal", "standard", "full", "custom"],
+          "description": "Selected OAuth scope profile tier."
+        },
+        "scopes": {
+          "type": "array",
+          "description": "Required Google API OAuth scopes for this service (1-35 items)."
+        },
+        "includeInAuth": {
+          "type": "boolean",
+          "description": "Whether Firebase GoogleAuthProvider requests these scopes on sign-in/refresh."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server update timestamp."
+        }
+      },
+      "required": ["ownerId", "serviceId", "profile", "scopes", "includeInAuth", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Owner-isolated operator profile containing email PII."
+    },
+    "/users/{userId}/botSnapshots/{snapshotId}": {
+      "schema": { "$ref": "#/entities/BotSnapshot" },
+      "description": "Subcollection of bot fleet communication and resource snapshots owned by userId."
+    },
+    "/users/{userId}/workspaceNotes/{noteId}": {
+      "schema": { "$ref": "#/entities/WorkspaceNote" },
+      "description": "Subcollection of pinned Google Workspace digests owned by userId."
+    },
+    "/users/{userId}/serviceSync/{serviceId}": {
+      "schema": { "$ref": "#/entities/ServiceSyncSetting" },
+      "description": "Subcollection of individual Google Workspace service synchronization toggles and status owned by userId."
+    },
+    "/users/{userId}/scopeConfigs/{serviceId}": {
+      "schema": { "$ref": "#/entities/OAuthScopeConfig" },
+      "description": "Subcollection of required Google API OAuth scope configurations per Workspace service owned by userId."
+    }
+  }
+}

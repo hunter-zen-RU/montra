@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" role="img" aria-labelledby="title">
+  <title id="title">Default chat avatar</title>
+  <circle cx="48" cy="48" r="48" fill="#dfe3e6"/>
+  <circle cx="48" cy="39" r="13" fill="#8696a0"/>
+  <path fill="#8696a0" d="M48 55c-13.8 0-25 8.4-25 18.8V78h50v-4.2C73 63.4 61.8 55 48 55z"/>
+</svg>
