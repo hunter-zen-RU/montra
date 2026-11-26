@@ -5,7 +5,7 @@ Montra links an authorized WhatsApp Web session to a Telegram control bot. It su
 > **Important:** Baileys uses the WhatsApp Web protocol, which can change and may not expose all phone history, contacts, expired statuses or media. The application can only cache information that WhatsApp delivers to the linked session. Test all live WhatsApp features on an account you control. Use automation respectfully, obey WhatsApp terms, and repost only content you own or have permission to share.
 
 
-> **about:** This is a very lightwheight version of zero bot with version v1.0.0 (the most lightwheight version)
+> **about:** A lightweight bridge derived from zero bot. Current version v1.3.0 (adds message bookmarks, richer auto-reply placeholders and CSV/JSON exports).
 ## Requirements
 
 - Node.js 18 or newer (Node 20+ recommended for built-in `fetch`, `FormData` and `Blob` support).
@@ -35,6 +35,7 @@ Set `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` and preferably `TELEGRAM_START_PIN`
 - `/chats` — cached chats.
 - `/open <jid|phone|name>` and `/close` — select a chat.
 - `/history [target] [count]` — show cached messages.
+- `/export [chat | JID | number] [count] [--format txt|csv|json]` — download cached messages as a file. Default is the classic text format; CSV has a header row (`timestamp,sender,from_me,message_id,body`) with RFC 4180 quoting; JSON includes per-message sender, direction, timestamp and body metadata. Exports are capped at 10 MB.
 - `/historymedia <n>` — attempt to retrieve media from the selected history result when the original message still contains downloadable media.
 - `/search <text> [--from sender] [--after YYYY-MM-DD] [--before YYYY-MM-DD]` — search cached messages.
 - `/contacts`, `/chatinfo <target>`, `/groups` — contact/chat/group information.
@@ -42,6 +43,16 @@ Set `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` and preferably `TELEGRAM_START_PIN`
 - `/backup` — create a private snapshot of configuration, sync cache, scheduled jobs and audit log (session credentials excluded).
 
 History commands search local data; they cannot force WhatsApp to provide arbitrary missing or expired history. Message content is stored in `data/syncStore.json` and may contain private information.
+
+### Message bookmarks
+
+Keep important cached messages after cache pruning:
+
+- `/history [target] [n]` then `/pin <n> [note]` — bookmark a message from the latest history list (re-pinning the same message updates its note).
+- `/pins [chat]` — list bookmarks, newest first (all chats when no target is given).
+- `/unpin <n>` — remove a bookmark from the latest `/pins` list.
+
+Bookmarks are stored in `data/montraBookmarks.json` (permissions 0600) and survive cache retention pruning. They still contain message text, so treat the file as private.
 
 ### Trigger-based auto-replies
 
@@ -53,7 +64,7 @@ Replies are disabled by default. Manage rules using `/autoreply`; supported rule
 - optional `contacts` allow-list (JIDs or names)
 - optional `schedule: { "start": "09:00", "end": "17:00" }` in server local time. Telegram rule syntax can pass priority, a comma-separated contact allow-list, and `HH:MM-HH:MM` as fields 5–7
 
-Placeholders include `{name}` and `{trigger}`. Invalid regular expressions are rejected. Group rules require a bot mention. Cooldowns and anti-ban send guards are applied. Rule hit counts are persisted as analytics.
+Placeholders include `{name}`, `{trigger}`, `{chat}` (chat JID), `{date}` (YYYY-MM-DD) and `{time}` (HH:MM), both in the configured timezone. Unknown placeholders stay literal. Invalid regular expressions are rejected. Group rules require a bot mention. Cooldowns and anti-ban send guards are applied. Rule hit counts are persisted as analytics.
 
 ### Jobs, reminders and AI cron
 
