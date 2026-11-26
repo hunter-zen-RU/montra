@@ -7,7 +7,7 @@
     "dev": "node index.js",
     "start": "node index.js",
     "build": "node --check index.js && node --check settings.js && node --check lib/dashboard.js",
-    "lint": "node --check index.js && node --check lib/telegramEngine.js && node --check lib/syncStore.js && node --check lib/autoReplyEngine.js && node --check lib/aiAssistant.js && node --check lib/backupManager.js && node --check lib/mediaArchive.js && node --check lib/analyzeEngine.js && node --check lib/systemMonitor.js && node --check lib/botEngine.js && node --check lib/workspaceTokenManager.js && node --check lib/facebookBot.js && node --check lib/dashboard.js && node --check lib/bookmarkEngine.js && node --check lib/exportFormatter.js",
+    "lint": "node --check index.js && node --check lib/telegramEngine.js && node --check lib/syncStore.js && node --check lib/autoReplyEngine.js && node --check lib/aiAssistant.js && node --check lib/backupManager.js && node --check lib/mediaArchive.js && node --check lib/analyzeEngine.js && node --check lib/systemMonitor.js && node --check lib/botEngine.js && node --check lib/workspaceTokenManager.js && node --check lib/facebookBot.js && node --check lib/dashboard.js && node --check lib/bookmarkEngine.js && node --check lib/exportFormatter.js && node --check lib/featureCommands.js",
     "test": "node --test",
     "selftest": "node selftest.js"
   },

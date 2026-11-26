@@ -134,3 +134,27 @@ test('auto-reply templates expand name, trigger, chat, date and time', () => {
     assert.equal(renderTemplate('x'.repeat(900), {}).length, 800);
     assert.equal(renderTemplate(null, {}), '');
 });
+
+test('featureCommands wires /export ahead of built-ins and bookmarks behind them', () => {
+    const featureCommands = require('../lib/featureCommands');
+    const calls = [];
+    const bot = {
+        use: (mw) => calls.push(['use', mw]),
+        command: (name) => calls.push(['command', name])
+    };
+    const engine = {
+        isAllowed: () => true,
+        deps: {},
+        historySelections: new Map()
+    };
+    featureCommands.registerExportOverride(bot, engine);
+    featureCommands.registerBookmarkCommands(bot, engine);
+    assert.equal(calls[0][0], 'use'); // /export interceptor must be middleware, registered first
+    assert.deepEqual(calls.slice(1).map(c => [c[0], c[1]]), [['command', 'pin'], ['command', 'pins'], ['command', 'unpin']]);
+
+    // Non-export messages pass straight through the interceptor.
+    const nexted = [];
+    const interceptor = calls[0][1];
+    return Promise.resolve(interceptor({ message: { text: '/ping' } }, () => nexted.push(1)))
+        .then(() => assert.deepEqual(nexted, [1]));
+});
